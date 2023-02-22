@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ARKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,6 +16,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+//        if !ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+//            // Ensure that the device supports scene depth and present
+//            //  an error-message view controller, if not.
+//            // Override point for customization after application launch.
+//
+//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//            window?.rootViewController = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
+//        } else {
+//            let vc = UIStoryboard.init(name: "Main", bundle : nil).instantiateViewController(withIdentifier: "scanningViewController") as! scanningViewController
+//                    let vcNav = UINavigationController(rootViewController: vc)
+//                    self.window?.rootViewController = vcNav
+//                    self.window?.makeKeyAndVisible()
+//        }
+        
+        print("saved scans", myscans)
         return true
     }
 
