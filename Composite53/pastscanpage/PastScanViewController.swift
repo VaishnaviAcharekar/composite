@@ -68,9 +68,9 @@ class PastScanViewController: UIViewController, UITableViewDelegate, UITableView
                 
                 myscans = myscans.sorted { $0.absoluteString > $1.absoluteString }
     
-                myscansname = myscansname.sorted()
+                myscansname = myscansname.sorted { $0 > $1 }
                 
-                myscansdate = myscansdate.sorted()
+                myscansdate = myscansdate.sorted { $0 > $1 }
                 print("data::", myscans, myscansname, myscansdate)
             }else{
                 print("file is not their")

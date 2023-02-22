@@ -1021,6 +1021,12 @@ extension Renderer {
             finalPointsPCD.append(SCNVector3(x: finalPoints[i].x, y: finalPoints[i].y, z: finalPoints[i].z))
         }
         
+        
+        for i in stride(from: 0, to: finalPointsPCD.count, by: 1)
+        {
+            finalPointsPCD[i].z *= -1
+        }
+        
 //        let date = Date()
 //        let dateFormatter = DateFormatter()
 //        dateFormatter.dateFormat = "YYYYMMdd_HHmmss"
@@ -1084,16 +1090,43 @@ extension Renderer {
 //
 
         
-        for i in stride(from: 0, to: finalPointsPCD.count, by: 1)
-        {
-            finalPointsPCD[i].z *= -1
-        }
+       
         
 //        let rawWithPoints = StaticAlgos.RemoveNoisyPoints(finalPointsPCD)
 //        savePointsToDirectory(rawWithPoints, pathToRawPcd)
         
-        pointsWithArms = finalPointsPCD
+        let scn_Full_PCD = finalPointsPCD.map { p in
+            simd_float3(Float(p.x), Float(p.y), Float(p.z))
+              }
+        
+        
+        let Floor_value = removeFloor(points: scn_Full_PCD)
+        
+        
+        
+        let all_point = Remove_points(full_pcd: finalPointsPCD, remove_point: Floor_value)
+        
+//        pointsWithArms = StaticAlgos.RemoveNoisyPoints(all_point)
+        pointsWithArms = all_point
+        
+        
+        
 
+    }
+    
+    func Remove_points(full_pcd : [SCNVector3] , remove_point : Float)->[SCNVector3]{
+        
+        var Array_After_remove = [SCNVector3]()
+        for i in stride (from: 1, to: full_pcd.count-1, by: 1){
+            
+            if full_pcd[i].y > remove_point{
+                Array_After_remove.append(full_pcd[i])
+            }
+            
+        }
+        
+        return Array_After_remove
+        
     }
     
     func savePointsToDirectory(_ points: [SCNVector3], _ _filepath: String)
@@ -1264,140 +1297,7 @@ extension Renderer {
         }
 
         
-        
-        /*
-         // 1
-         var fileToWrite2 = ""
-         let headers2 = ["ply", "format ascii 1.0", "element vertex \(count)", "property float32 x", "property float32 y", "property float32 z", "element face 0", "property list uint8 int32 vertex_index", "end_header"]
-         for header in headers2 {
-             fileToWrite2 += header
-             fileToWrite2 += "\r\n"
-         }
-
-         for i in 1 ..< count {
-             // 3
-             let point2 = finalPoints[i]
-             // 5
-             let pvValue2 = "\(point2.x) \(point2.y) \(point2.z)"
-             fileToWrite2 += pvValue2
-             fileToWrite2 += "\r\n"
-         }
-         // 6
-
-         // Set Date Format
-         dateFormatter.dateFormat = "YYYYMMdd_hhmmss"
-
-         // Convert Date to String
-         let filename = dateFormatter.string(from: date)
-         print("filename:\(filename)")
-
-         let paths2 = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-         let documentsDirectory2 = paths2[0]
-         let file2 = documentsDirectory2.appendingPathComponent("_rawPLY_\(filename).ply")
-
-         do {
-             print("File path2 : " + file2.absoluteString)
-             print("remove prefix2 : \(file2.absoluteString.deletingPrefix("file://"))")
-             // 7
-             try fileToWrite2.write(to: file2, atomically: true, encoding: String.Encoding.ascii)
-             print("file save sucessfully2")
-             isSavingFile = false
-             pathnameofplyfile = file2.path
-             // convertCloud(path: file2.absoluteString.deletingPrefix("file://"))
-             particleBufferIn()
-
-         } catch {
-             print("Failed to write PLY file2", error)
-         }
-
-         // 2
-         let countsmooth = smoothpoints.count
-         // print("countsmooth: \(countsmooth)")
-         // 1
-         var fileToWritesmooth = ""
-         let headersmooth = ["ply", "format ascii 1.0", "element vertex \(countsmooth)", "property float32 x", "property float32 y", "property float32 z", "element face 0", "property list uint8 int32 vertex_index", "end_header"]
-         for header in headersmooth {
-             fileToWritesmooth += header
-             fileToWritesmooth += "\r\n"
-         }
-
-         for i in 1 ..< countsmooth {
-             // 3
-             let pointsmooth = smoothpoints[i]
-             // 5
-             let pvValuesmooth = "\(pointsmooth.x) \(pointsmooth.y) \(pointsmooth.z)"
-             fileToWritesmooth += pvValuesmooth
-             fileToWritesmooth += "\r\n"
-         }
-         // 6
-
-         // Set Date Format
-         dateFormatter.dateFormat = "YYYYMMdd_hhmmss"
-
-         // Convert Date to String
-         let filenamesmooth = dateFormatter.string(from: date)
-         print("filename:\(filenamesmooth)")
-
-         let pathsmooth = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-         let documentsDirectorysmooth = pathsmooth[0]
-         let filesmooth = documentsDirectorysmooth.appendingPathComponent("_rawPLYsmooth_\(filenamesmooth).ply")
-
-         do {
-             print("File path2 : " + filesmooth.absoluteString)
-             print("remove prefix2 : \(filesmooth.absoluteString.deletingPrefix("file://"))")
-             // 7
-             try fileToWritesmooth.write(to: filesmooth, atomically: true, encoding: String.Encoding.ascii)
-             print("file save sucessfully smooth")
-         } catch {
-             print("Failed to write PLY filesmooth", error)
-         }
-         // 2
-         let count2 = finalPoint.count
-         //  print("count2: \(count2)")
-         // 1
-         var fileToWrite = ""
-         let headers = ["ply", "format ascii 1.0", "element vertex \(count2)", "property float32 x", "property float32 y", "property float32 z", "element face 0", "property list uint8 int32 vertex_index", "end_header"]
-         for header in headers {
-             fileToWrite += header
-             fileToWrite += "\r\n"
-         }
-
-         for i in 1 ..< count2 {
-             // 3
-             let point = finalPoint[i]
-             // 5
-             let pvValue = "\(point.x) \(point.y) \(point.z)"
-             fileToWrite += pvValue
-             fileToWrite += "\r\n"
-         }
-         // 6
-
-         // Set Date Format
-         dateFormatter.dateFormat = "YYYYMMdd_hhmmss"
-
-         // Convert Date to String
-         let filename2 = dateFormatter.string(from: date)
-         print("filename:\(filename2)")
-
-         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-         let documentsDirectory = paths[0]
-         let file = documentsDirectory.appendingPathComponent("_rawPLYsecond_\(filename2).ply")
-
-         do {
-             print("File path2 : " + file.absoluteString)
-             print("remove prefix2 : \(file.absoluteString.deletingPrefix("file://"))")
-             // 7
-             try fileToWrite.write(to: file, atomically: true, encoding: String.Encoding.ascii)
-             print("file save sucessfully")
-             isSavingFile = false
-             pathnameofplyfile = file.path
-             // convertCloud(path: file2.absoluteString.deletingPrefix("file://"))
-             particleBufferIn()
-
-         } catch {
-             print("Failed to write PLY file2", error)
-         }
-         */
+     
     }
     // convert point cloud to scn
     func saveConvertedScn(path: String) {
@@ -1464,4 +1364,162 @@ extension Renderer {
           
         }
     }
+    
+    func removeFloor(points:[simd_float3])->Float
+       {
+           var deltaY: Float = 0.02
+           var pcdcutBottom = [simd_float3]()
+           pcdcutBottom.append(contentsOf: points)
+           pcdcutBottom = pcdcutBottom.sorted{$0.y < $1.y}
+           var minzPoints: [[simd_float3]] = []
+           var cutheightfound = false
+           var maxh = pcdcutBottom[pcdcutBottom.count-1].y
+           var minh = pcdcutBottom[0].y
+           var tempminh = minh
+           var cutheight: Float = 0
+           print("min and max height",minh, maxh, pcdcutBottom.count-1)
+           while(minh < maxh - deltaY)
+           {
+               var pointsatgivenY : [simd_float3] = []
+
+               for i in 0..<pcdcutBottom.count
+               {
+                   if pcdcutBottom[i].y < minh+deltaY && pcdcutBottom[i].y > minh
+                   {
+                       pointsatgivenY.append(pcdcutBottom[i])
+
+                   }
+
+               }
+
+
+//               print("point at given Y",i,pointsatgivenY.count)
+               if pointsatgivenY.count != 0
+               {
+                   minzPoints.append(pointsatgivenY)
+
+               }
+               minh += deltaY
+
+           }
+
+           var countforlayer = 0
+           for i in 0..<minzPoints.count-5
+           {
+               var testlayer = minzPoints[i]
+   //            testlayer.sort{$0.x < $1.x}
+   //            # firstx=testlayer[0]
+               var midx = testlayer[Int(testlayer.count/2)]
+               testlayer.sort{$0.z > $1.z}
+               var minz = testlayer[0]
+               var maxz = testlayer[testlayer.count-1]
+               var midz = 3 * minz + maxz / 4
+               
+               for j in i+1..<i+4
+               {
+                   var testlayertemp = minzPoints[j]
+   //                # sorted(testlayertemp,key=lambda x: x[2], reverse=False)
+                   for k in 0..<testlayertemp.count
+                   {
+                       if(testlayertemp[k].z <= minz.z && testlayertemp[k].z >= midz.z)
+                       {
+                           countforlayer += 1
+
+                       }
+                       if countforlayer < 3
+                       {
+                           if j == i+3
+                           {
+                               print("cutbottom",j)
+                               cutheightfound = true
+                               break
+                           }
+                           countforlayer = 0
+
+                       }
+                       else
+                       {
+                           countforlayer = 0
+
+                           break
+                       }
+                           
+                       countforlayer = 0
+
+                   }
+                   
+                 
+               }
+              
+
+               if cutheightfound
+               {
+                   cutheight = minzPoints[i][0].y + 2 * deltaY
+                   break
+               }
+                   
+           }
+           if cutheight==0{
+               
+               var countforlayer = 0
+               for i in 0..<minzPoints.count-5
+               {
+                   var testlayer = minzPoints[i]
+   //                testlayer.sort{$0.x < $1.x}
+   //    //            # firstx=testlayer[0]
+   //                var midx=testlayer[Int(testlayer.count/2)]
+                   testlayer.sort{$0.z < $1.z}
+                   var minz = testlayer[0]
+                   var maxz = testlayer[testlayer.count-1]
+                   var midz = 3 * minz + maxz / 4
+                   for j in i+1..<i+4
+                   {
+                       var testlayertemp=minzPoints[j]
+       //                # sorted(testlayertemp,key=lambda x: x[2], reverse=False)
+                       for k in 0..<testlayertemp.count
+                       {
+                           if(testlayertemp[k].z >= minz.z && testlayertemp[k].z <= midz.z)
+                           {
+                               countforlayer += 1
+
+                           }
+                           if countforlayer < 3
+                           {
+                               if j == i + 3
+                               {
+                                   print("cutbottom",j)
+                                   cutheightfound = true
+                                   break
+                               }
+                               countforlayer = 0
+
+                           }
+                           else
+                           {
+                               countforlayer = 0
+
+                               break
+                           }
+                           countforlayer = 0
+
+                                   
+                       }
+                       
+                     
+                   }
+                  
+
+                   if cutheightfound
+                   {
+                       cutheight = minzPoints[i][0].y + 2 * deltaY
+                       break
+                   }
+                       
+               }
+           }
+
+   //           # cutheightglobal=cutheight
+              print("cutheight bottom:",cutheight)
+              return cutheight
+       }
 }
