@@ -31,6 +31,7 @@ class scanningViewController: Baseviewcontroller ,ARSessionDelegate{
     var configuration = ARWorldTrackingConfiguration()
     var sessiongetsstarted: Bool = false
     var firstcome: Bool = false
+    var sessioncount: Int = 0
     
     func createSpinnerView() {
         let child = SpinnerViewController()
@@ -140,6 +141,7 @@ class scanningViewController: Baseviewcontroller ,ARSessionDelegate{
                     self.sessiongetsstarted = true
                     self.countDownLabel.isHidden = true
                     self.firstcome = true
+                    self.sessioncount = 1
                 }
                     break
                     
@@ -161,14 +163,20 @@ class scanningViewController: Baseviewcontroller ,ARSessionDelegate{
     
     @IBAction func PlayBtn(_ sender: UIButton) {
         
-        if !sessiongetsstarted{
+        if !sessiongetsstarted && self.sessioncount == 0{
             print("counter1", counter)
             counter = 3
             
             self.countDownLabel.text = String(counter)
             self.countDownLabel.isHidden = false
             time1 = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+        }else{
+             print("session run again")
+            self.session.run(self.configuration)
+            self.sessiongetsstarted = true
         }
+        
+       
         
       
     }
@@ -179,6 +187,8 @@ class scanningViewController: Baseviewcontroller ,ARSessionDelegate{
             self.session.pause()
         }                       
     }
+    
+   
     
     @IBAction func stopBtn(_ sender: UIButton) {
         showLoader()
